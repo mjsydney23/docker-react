@@ -1,0 +1,16 @@
+name: Docker-Elastic-Beanstalk-CICD
+
+on:
+    push:
+        branches: [main]
+
+jobs:
+    continuous-integration:
+        runs-on: ubuntu-latest
+
+        steps:
+            - uses: actions/checkout@v2
+
+            - name: Build the Docker image
+              run: docker build -t mjsydney23/docker-react -f Dockerfile.dev .
+
