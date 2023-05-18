@@ -2,9 +2,12 @@ name: Docker-Elastic-Beanstalk-CICD
 
 on:
     pull_request:
-        branches: [ feature ]
+      types:
+        - opened
+      branches:
+        - 'feature/**'
     push:
-        branches: [ main ]
+      branches: [ main ]
 
 jobs:
 
