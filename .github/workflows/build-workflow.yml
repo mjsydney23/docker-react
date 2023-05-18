@@ -6,9 +6,12 @@ on:
   push:
     # Trigger the worflow on push event for all branches
     branches:
-      -  '**'  
+      -  main
+      -  feature
   pull_request:
-    # Trigger the worflow on pull request event for main branch
+    types:
+      - opened
+    # Trigger the worflow on pull request event for feature branch
     branches:
       - feature
 
