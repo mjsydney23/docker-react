@@ -22,10 +22,47 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-        - uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-        - name: Build the Docker image
-          run: docker build -t mjsydney23/docker-react -f Dockerfile.dev .
+      - name: Build the Docker image
+        run: docker build -t mjsydney23/docker-react -f Dockerfile.dev .
 
-        - name: Test the Docker Image
-          run: docker run -e CI=true mjsydney23/docker-react npm run test
+      - name: Test the Docker Image
+        run: docker run -e CI=true mjsydney23/docker-react npm run test
+  
+  # "deploy" workflow
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Build the Docker image
+        run: docker build -t mjsydney23/docker-react .
+    
+      - name: Get Timestamp
+        uses: gerred/actions/current-time@master
+        id: current-time
+
+      - name: Run String Replace
+        uses: frabert/replace-string-action@master
+        id: format-time
+        with:
+          pattern: '[:\.]+'
+          string: "${{ steps.current-time.outputs.time }}"
+          replace-with: '-'
+          flags: 'g'
+
+      - name: Generate Deployment Package
+        run: zip -r deploy.zip * -x '*.git*'
+
+      - name: Deploy to EB
+        uses: einaregilsson/beanstalk-deploy@v21
+        with:
+          aws_access_key: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws_secret_key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          application_name: "docker-react"
+          environment_name: "Docker-react-env"
+          version_label: "docker-app-${{ steps.format-time.outputs.replaced }}"
+          region: ap-southeast-2
+          deployment_package: deploy.zip
